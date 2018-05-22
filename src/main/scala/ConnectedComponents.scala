@@ -40,25 +40,26 @@ object ConnectedComponents {
     // Creates a SparkSession.
     val spark = SparkSession
       .builder
-      .appName(s"${this.getClass.getSimpleName}")
+      .appName(s"${this.getClass.getSimpleName}").config("spark.master", "local")
       .getOrCreate()
     val sc = spark.sparkContext
 
     // $example on$
     // Load the graph as in the PageRank example
-    val graph = GraphLoader.edgeListFile(sc, "followers.txt")
+    val graph = GraphLoader.edgeListFile(sc, "com-lj.ungraph.txt")
     // Find the connected components
-    val cc = graph.connectedComponents().vertices
+    val cc = graph.connectedComponents(1).vertices
     // Join the connected components with the usernames
-    val users = sc.textFile("users.txt").map { line =>
+    /*val users = sc.textFile("users.txt").map { line =>
       val fields = line.split(",")
       (fields(0).toLong, fields(1))
     }
     val ccByUsername = users.join(cc).map {
       case (id, (username, cc)) => (username, cc)
-    }
+    }*/
     // Print the result
-    println(ccByUsername.collect().mkString("\n"))
+    println(cc.collect().mkString("\n"))
+    //println(ccByUsername.collect().mkString("\n"))
     // $example off$
     spark.stop()
   }
